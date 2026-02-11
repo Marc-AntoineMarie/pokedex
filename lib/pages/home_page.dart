@@ -97,11 +97,47 @@ class _HomePageState extends State<HomePage> {
         title: const Text("PokeDex Pro"),
         backgroundColor: Colors.cyan,
         actions: [
+          // 1. Bouton Équipe
           IconButton(
             icon: const Icon(Icons.groups, size: 28),
-            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => TeamPage(allPokemon: allPokemon))),
+            tooltip: "Mon Équipe",
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => TeamPage(allPokemon: allPokemon)),
+              );
+            },
           ),
-          // ... (Le reste de ton AppBar reste identique)
+          
+          // 2. Menu Profil et Déconnexion (Celui qui avait disparu)
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.account_circle, size: 30),
+            onSelected: (value) {
+              if (value == 'logout') {
+                FirebaseAuth.instance.signOut();
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                enabled: false,
+                child: Text(
+                  FirebaseAuth.instance.currentUser?.email ?? "Dresseur",
+                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.cyan),
+                ),
+              ),
+              const PopupMenuDivider(),
+              const PopupMenuItem(
+                value: 'logout',
+                child: Row(
+                  children: [
+                    Icon(Icons.logout, color: Colors.red),
+                    SizedBox(width: 10),
+                    Text("Déconnexion"),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ],
       ),
       body: Column(
