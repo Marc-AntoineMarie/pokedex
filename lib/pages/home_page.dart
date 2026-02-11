@@ -4,7 +4,8 @@ import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/pokemon.dart';
 import '../widgets/poke_card.dart';
-import '../services/database_service.dart'; // Import indispensable
+import '../services/database_service.dart';
+import 'team_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -48,6 +49,7 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  // --- MODIFICATION ICI : AJOUT DU BOUTON RECRUTER ---
   void _showDetails(BuildContext context, Pokemon poke) {
     String imgUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${poke.id}.png";
     
@@ -67,6 +69,29 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(height: 10),
             const Text("Faiblesses:", style: TextStyle(fontWeight: FontWeight.bold)),
             Text(poke.weaknesses.join(', ')),
+            const SizedBox(height: 20),
+            // Nouveau bouton pour l'équipe
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () async {
+                String? error = await DatabaseService().toggleTeam(poke.id);
+                if (error != null && context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(error), backgroundColor: Colors.orange),
+                  );
+                } else if (context.mounted) {
+                  Navigator.pop(context); // Ferme les détails après ajoutq
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Équipe mise à jour !"), duration: Duration(seconds: 1)),
+                  );
+                }
+              },
+              icon: const Icon(Icons.add_moderator),
+              label: const Text("Recruter dans l'équipe"),
+            )
           ],
         ),
       ),
@@ -80,6 +105,16 @@ class _HomePageState extends State<HomePage> {
         title: const Text("PokeDex Pro"),
         backgroundColor: Colors.cyan,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.groups, size: 28),
+            tooltip: "Mon Équipe",
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => TeamPage(allPokemon: allPokemon)),
+              );
+            },
+          ),
           PopupMenuButton<String>(
             icon: const Icon(Icons.account_circle, size: 30),
             onSelected: (value) {
@@ -129,10 +164,7 @@ class _HomePageState extends State<HomePage> {
                 : StreamBuilder<List<int>>(
                     stream: DatabaseService().favoritesStream,
                     builder: (context, snapshot) {
-                      // Récupération des IDs favoris depuis Firebase
                       List<int> favIds = snapshot.data ?? [];
-
-                      // Création de la liste triée : favoris d'abord
                       List<Pokemon> displayList = List.from(filteredPokemon);
                       displayList.sort((a, b) {
                         bool aIsFav = favIds.contains(a.id);
