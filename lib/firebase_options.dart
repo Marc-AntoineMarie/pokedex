@@ -85,4 +85,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'pokedex-2a6df.firebasestorage.app',
     measurementId: 'G-KSR298TWHL',
   );
+
 }
