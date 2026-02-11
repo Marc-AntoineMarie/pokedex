@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/pokemon.dart';
 import '../widgets/poke_card.dart';
+import '../services/database_service.dart'; // Import indispensable
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -83,7 +84,7 @@ class _HomePageState extends State<HomePage> {
             icon: const Icon(Icons.account_circle, size: 30),
             onSelected: (value) {
               if (value == 'logout') {
-                FirebaseAuth.instance.signOut(); // Déconnexion Firebase
+                FirebaseAuth.instance.signOut();
               }
             },
             itemBuilder: (context) => [
@@ -125,19 +126,44 @@ class _HomePageState extends State<HomePage> {
           Expanded(
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : GridView.builder(
-                    padding: const EdgeInsets.all(10),
-                    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 180,
-                      childAspectRatio: 0.8,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                    ),
-                    itemCount: filteredPokemon.length,
-                    itemBuilder: (context, index) => PokeCard(
-                      pokemon: filteredPokemon[index],
-                      onTap: () => _showDetails(context, filteredPokemon[index]),
-                    ),
+                : StreamBuilder<List<int>>(
+                    stream: DatabaseService().favoritesStream,
+                    builder: (context, snapshot) {
+                      // Récupération des IDs favoris depuis Firebase
+                      List<int> favIds = snapshot.data ?? [];
+
+                      // Création de la liste triée : favoris d'abord
+                      List<Pokemon> displayList = List.from(filteredPokemon);
+                      displayList.sort((a, b) {
+                        bool aIsFav = favIds.contains(a.id);
+                        bool bIsFav = favIds.contains(b.id);
+                        if (aIsFav && !bIsFav) return -1;
+                        if (!aIsFav && bIsFav) return 1;
+                        return 0;
+                      });
+
+                      return GridView.builder(
+                        padding: const EdgeInsets.all(10),
+                        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 180,
+                          childAspectRatio: 0.8,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                        ),
+                        itemCount: displayList.length,
+                        itemBuilder: (context, index) {
+                          final pokemon = displayList[index];
+                          return PokeCard(
+                            pokemon: pokemon,
+                            isFavorite: favIds.contains(pokemon.id),
+                            onTap: () => _showDetails(context, pokemon),
+                            onFavoriteTap: () {
+                              DatabaseService().toggleFavorite(pokemon.id);
+                            },
+                          );
+                        },
+                      );
+                    },
                   ),
           ),
         ],
