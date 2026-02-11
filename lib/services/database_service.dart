@@ -35,4 +35,37 @@ class DatabaseService {
       return [];
     });
   }
+
+  // Ajouter ou retirer de l'équipe (Max 6)
+  Future<String?> toggleTeam(int pokemonId) async {
+    DocumentReference userDoc = usersCollection.doc(uid);
+    DocumentSnapshot doc = await userDoc.get();
+    List team = [];
+    
+    if (doc.exists) {
+      team = (doc.data() as Map)['team'] ?? [];
+    }
+
+    if (team.contains(pokemonId)) {
+      team.remove(pokemonId);
+    } else {
+      if (team.length >= 6) {
+        return "Ton équipe est déjà complète (6 Pokémon max) !";
+      }
+      team.add(pokemonId);
+    }
+
+    await userDoc.set({'team': team}, SetOptions(merge: true));
+    return null; // Pas d'erreur
+  }
+
+  // Stream pour l'équipe
+  Stream<List<int>> get teamStream {
+    return usersCollection.doc(uid).snapshots().map((snapshot) {
+      if (snapshot.exists && snapshot.data() != null) {
+        return List<int>.from((snapshot.data() as Map)['team'] ?? []);
+      }
+      return [];
+    });
+  }
 }
