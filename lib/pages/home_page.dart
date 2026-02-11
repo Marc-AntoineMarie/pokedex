@@ -6,6 +6,7 @@ import '../models/pokemon.dart';
 import '../widgets/poke_card.dart';
 import '../services/database_service.dart';
 import 'team_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -26,18 +27,47 @@ class _HomePageState extends State<HomePage> {
   }
 
   fetchData() async {
-    final response = await http.get(Uri.parse(
-        "https://raw.githubusercontent.com/Biuni/PokemonGO-Pokedex/master/pokedex.json"));
-    if (response.statusCode == 200) {
-      var decodedJson = jsonDecode(response.body);
-      setState(() {
-        allPokemon = (decodedJson['pokemon'] as List)
-            .map((p) => Pokemon.fromJson(p))
-            .toList();
-        filteredPokemon = allPokemon;
-        isLoading = false;
-      });
+    final prefs = await SharedPreferences.getInstance();
+    
+    // Étape A : On essaie de lire le cache
+    final String? cachedData = prefs.getString('pokedex_cache');
+    if (cachedData != null) {
+      var decodedJson = jsonDecode(cachedData);
+      _updateUI(decodedJson);
+      print("Chargé depuis le cache local 💾");
     }
+
+    // Étape B : On lance l'appel réseau en arrière-plan
+    try {
+      final response = await http.get(Uri.parse(
+          "https://raw.githubusercontent.com/Biuni/PokemonGO-Pokedex/master/pokedex.json"));
+      
+      if (response.statusCode == 200) {
+        // On met à jour le cache avec les nouvelles données
+        await prefs.setString('pokedex_cache', response.body);
+        
+        var decodedJson = jsonDecode(response.body);
+        _updateUI(decodedJson);
+        print("Chargé depuis le réseau et cache mis à jour 🌐");
+      }
+    } catch (e) {
+      print("Erreur réseau (normal si hors-ligne) : $e");
+      // Si on n'a ni cache ni réseau, on arrête le chargement
+      if (cachedData == null) {
+        setState(() => isLoading = false);
+      }
+    }
+  }
+
+  // Petite fonction helper pour éviter la répétition
+  void _updateUI(dynamic json) {
+    setState(() {
+      allPokemon = (json['pokemon'] as List)
+          .map((p) => Pokemon.fromJson(p))
+          .toList();
+      filteredPokemon = allPokemon;
+      isLoading = false;
+    });
   }
 
   void _filterPokemon(String query) {
