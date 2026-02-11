@@ -4,14 +4,16 @@ import '../models/pokemon.dart';
 class PokeCard extends StatefulWidget {
   final Pokemon pokemon;
   final VoidCallback onTap;
-  final bool isFavorite; // Savoir si on affiche le coeur plein ou vide
-  final VoidCallback onFavoriteTap; // Action quand on clique sur le coeur
+  final bool isFavorite;
+  final bool isInTeam; // <--- NOUVEAU : État de l'équipe
+  final VoidCallback onFavoriteTap;
 
   const PokeCard({
     super.key, 
     required this.pokemon, 
     required this.onTap,
     required this.isFavorite,
+    required this.isInTeam, // <--- AJOUTÉ
     required this.onFavoriteTap,
   });
 
@@ -58,18 +60,33 @@ class _PokeCardState extends State<PokeCard> {
                 ),
               ),
               
+              // INDICATEUR FAVORI (En haut à droite)
               Positioned(
                 top: 5,
                 right: 5,
                 child: IconButton(
                   icon: Icon(
-                    // Utilisation de la condition pour l'icône
                     widget.isFavorite ? Icons.favorite : Icons.favorite_border,
                     color: Colors.red,
                   ),
                   onPressed: widget.onFavoriteTap,
                 ),
               ),
+
+              // INDICATEUR ÉQUIPE (En haut à gauche - Nouveau)
+              if (widget.isInTeam)
+                Positioned(
+                  top: 10,
+                  left: 10,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Colors.blueAccent,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.shield, color: Colors.white, size: 16),
+                  ),
+                ),
             ],
           ),
         ),

@@ -40,23 +40,24 @@ class DatabaseService {
   Future<String?> toggleTeam(int pokemonId) async {
     DocumentReference userDoc = usersCollection.doc(uid);
     DocumentSnapshot doc = await userDoc.get();
-    List team = [];
     
-    if (doc.exists) {
-      team = (doc.data() as Map)['team'] ?? [];
+    List<int> team = [];
+    if (doc.exists && (doc.data() as Map).containsKey('team')) {
+      team = List<int>.from((doc.data() as Map)['team']);
     }
 
     if (team.contains(pokemonId)) {
-      team.remove(pokemonId);
+      team.remove(pokemonId); // On le retire s'il y est déjà
     } else {
       if (team.length >= 6) {
-        return "Ton équipe est déjà complète (6 Pokémon max) !";
+        return "Équipe complète ! (6 max)";
       }
+      // Pas besoin de vérifier le doublon ici car le "if (team.contains)" s'en occupe
       team.add(pokemonId);
     }
 
-    await userDoc.set({'team': team}, SetOptions(merge: true));
-    return null; // Pas d'erreur
+    await userDoc.update({'team': team}); // Update est plus sûr que Set ici
+    return null;
   }
 
   // Stream pour l'équipe
