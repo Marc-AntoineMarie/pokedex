@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/pokemon.dart';
 import '../widgets/poke_card.dart';
 
@@ -28,7 +29,6 @@ class _HomePageState extends State<HomePage> {
     if (response.statusCode == 200) {
       var decodedJson = jsonDecode(response.body);
       setState(() {
-        // On transforme chaque élément du JSON en objet Pokemon
         allPokemon = (decodedJson['pokemon'] as List)
             .map((p) => Pokemon.fromJson(p))
             .toList();
@@ -75,7 +75,41 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("PokeDex"), backgroundColor: Colors.cyan),
+      // --- APPBAR MISE À JOUR ---
+      appBar: AppBar(
+        title: const Text("PokeDex Pro"),
+        backgroundColor: Colors.cyan,
+        actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.account_circle, size: 30),
+            onSelected: (value) {
+              if (value == 'logout') {
+                FirebaseAuth.instance.signOut(); // Déconnexion Firebase
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                enabled: false,
+                child: Text(
+                  FirebaseAuth.instance.currentUser?.email ?? "Dresseur",
+                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.cyan),
+                ),
+              ),
+              const PopupMenuDivider(),
+              const PopupMenuItem(
+                value: 'logout',
+                child: Row(
+                  children: [
+                    Icon(Icons.logout, color: Colors.red),
+                    SizedBox(width: 10),
+                    Text("Déconnexion"),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Padding(
