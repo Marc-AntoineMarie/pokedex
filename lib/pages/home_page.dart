@@ -75,7 +75,6 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // --- APPBAR MISE À JOUR ---
       appBar: AppBar(
         title: const Text("PokeDex Pro"),
         backgroundColor: Colors.cyan,
