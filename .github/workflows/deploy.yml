@@ -18,6 +18,7 @@ jobs:
           host: ${{ secrets.VPS_IP }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 4025
           timeout: 60s
           script: |
             mkdir -p ~/apps/pokedex
