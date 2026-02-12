@@ -20,6 +20,8 @@ jobs:
           host: ${{ secrets.VPS_IP }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          fingerprint: ""
+          script_stop: true
           script: |
             mkdir -p ~/apps/pokedex
             cd ~/apps/pokedex
