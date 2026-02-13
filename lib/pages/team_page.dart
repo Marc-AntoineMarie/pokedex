@@ -102,7 +102,6 @@ class TeamPage extends StatelessWidget {
                         itemCount: teamMembers.length,
                         itemBuilder: (context, index) {
                           final pokemon = teamMembers[index];
-                          // --- CORRECTION ICI ---
                           return PokeCard(
                             pokemon: pokemon,
                             isFavorite: favIds.contains(pokemon.id),
