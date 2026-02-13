@@ -5,6 +5,7 @@ class PokeCard extends StatefulWidget {
   final Pokemon pokemon;
   final VoidCallback onTap;
   final bool isFavorite;
+  final bool isLocked;
   final bool isInTeam; // <--- NOUVEAU : État de l'équipe
   final VoidCallback onFavoriteTap;
 
@@ -13,7 +14,8 @@ class PokeCard extends StatefulWidget {
     required this.pokemon, 
     required this.onTap,
     required this.isFavorite,
-    required this.isInTeam, // <--- AJOUTÉ
+    required this.isLocked,
+    required this.isInTeam,
     required this.onFavoriteTap,
   });
 
@@ -27,6 +29,13 @@ class _PokeCardState extends State<PokeCard> {
   @override
   Widget build(BuildContext context) {
     String imgUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${widget.pokemon.id}.png";
+
+    ColorFiltered(
+      colorFilter: widget.isLocked
+          ? const ColorFilter.mode(Colors.black, BlendMode.srcIn) // Devient une ombre noire
+          : const ColorFilter.mode(Colors.transparent, BlendMode.multiply),
+      child: Image.network(imgUrl),
+    );
 
     return MouseRegion(
       onEnter: (_) => setState(() => isHovered = true),

@@ -72,4 +72,20 @@ class DatabaseService {
       return [];
     });
   }
+
+  Stream<List<int>> get inventoryStream {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return Stream.value([]);
+  return usersCollection.doc(user.uid).collection('inventory').snapshots().map((snapshot) => snapshot.docs.map((doc) => int.parse(doc.id)).toList());
+}
+Stream<List<int>> get inventoryStream2 {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return Stream.value([]);
+  return FirebaseFirestore.instance
+      .collection('users')
+      .doc(user.uid)
+      .collection('inventory')
+      .snapshots()
+      .map((snapshot) => snapshot.docs.map((doc) => int.parse(doc.id)).toList());
+}
 }

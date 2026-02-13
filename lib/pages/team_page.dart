@@ -106,8 +106,9 @@ class TeamPage extends StatelessWidget {
                           return PokeCard(
                             pokemon: pokemon,
                             isFavorite: favIds.contains(pokemon.id),
+                            isLocked: false,
                             isInTeam: true, // Forcément vrai puisqu'on est sur TeamPage
-                            onTap: () {}, 
+                            onTap: () {},
                             onFavoriteTap: () => DatabaseService().toggleFavorite(pokemon.id),
                           );
                         },

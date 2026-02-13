@@ -102,7 +102,7 @@ class StarterSelectionPage extends StatelessWidget {
                 children: [
                   Text(
                     starter['name'],
-                    style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.black),
+                    style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
