@@ -20,6 +20,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 4025
           timeout: 1800s
+          debug: true 
           script: |
             mkdir -p ~/apps/pokedex
             cd ~/apps/pokedex
