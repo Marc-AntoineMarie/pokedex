@@ -30,6 +30,7 @@ jobs:
               git clone https://github.com/${{ github.repository }}.git .
             else
               git pull origin main
+              fi
             docker build --progress=plain --cache-from pokedex-web -t pokedex-web . || docker build --progress=plain -t pokedex-web .
             docker stop pokedex-app || true
             docker rm pokedex-app || true
