@@ -30,12 +30,17 @@ class _PokeCardState extends State<PokeCard> {
   Widget build(BuildContext context) {
     String imgUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${widget.pokemon.id}.png";
 
-    ColorFiltered(
-      colorFilter: widget.isLocked
-          ? const ColorFilter.mode(Colors.black, BlendMode.srcIn) // Devient une ombre noire
-          : const ColorFilter.mode(Colors.transparent, BlendMode.multiply),
-      child: Image.network(imgUrl),
-    );
+      ColorFiltered(
+    colorFilter: widget.isLocked
+        ? const ColorFilter.matrix([
+            0, 0, 0, 0, 0, // Rouge -> 0
+            0, 0, 0, 0, 0, // Vert  -> 0
+            0, 0, 0, 0, 0, // Bleu  -> 0
+            0, 0, 0, 1, 0, // Alpha (on garde la transparence)
+          ])
+        : const ColorFilter.mode(Colors.transparent, BlendMode.multiply),
+    child: Image.network(imgUrl, height: 80),
+  );
 
     return MouseRegion(
       onEnter: (_) => setState(() => isHovered = true),
