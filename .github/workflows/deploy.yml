@@ -20,6 +20,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 4025
           timeout: 1800s
+          command_timeout: 3600s
           debug: true 
           script: |
             set -x
