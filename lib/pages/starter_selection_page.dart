@@ -15,8 +15,28 @@ class StarterSelectionPage extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
+    final userDoc = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid);
+
+    // Garde-fou : ne pas attribuer de starter si l'équipe contient déjà des Pokémon
+    final userSnapshot = await userDoc.get();
+    final userData = userSnapshot.data() as Map<String, dynamic>? ?? {};
+    final existingTeam = List<int>.from(userData['team'] ?? const []);
+    if (existingTeam.isNotEmpty) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              "Starter non disponible : vous avez déjà des Pokémon dans l'équipe.",
+            ),
+          ),
+        );
+      }
+      return;
+    }
+
     final batch = FirebaseFirestore.instance.batch();
-    final userDoc = FirebaseFirestore.instance.collection('users').doc(user.uid);
 
     batch.set(userDoc.collection('inventory').doc(id.toString()), {
       'id': id,
@@ -93,7 +113,10 @@ class StarterSelectionPage extends StatelessWidget {
         ),
         title: Text(
           "Choisir ${starter['name']} ?",
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         content: Text(
           "Ce compagnon de type ${starter['type']} te suivra partout.",
@@ -161,16 +184,18 @@ class _StarterCardState extends State<_StarterCard> {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: isHovered 
-                      ? widget.starter['color'].withOpacity(0.5) 
+                  color: isHovered
+                      ? widget.starter['color'].withOpacity(0.5)
                       : Colors.black.withOpacity(0.3),
                   blurRadius: isHovered ? 20 : 10,
                   spreadRadius: isHovered ? 5 : 0,
-                )
+                ),
               ],
               gradient: LinearGradient(
                 colors: [
-                  isHovered ? widget.starter['color'] : widget.starter['color'].withOpacity(0.6),
+                  isHovered
+                      ? widget.starter['color']
+                      : widget.starter['color'].withOpacity(0.6),
                   Colors.black.withOpacity(0.8),
                 ],
                 begin: Alignment.topLeft,
@@ -214,12 +239,17 @@ class _StarterCardState extends State<_StarterCard> {
                           color: Colors.white,
                           fontSize: 26,
                           fontWeight: FontWeight.w900,
-                          shadows: [Shadow(blurRadius: 10, color: Colors.black)],
+                          shadows: [
+                            Shadow(blurRadius: 10, color: Colors.black),
+                          ],
                         ),
                       ),
                       const SizedBox(height: 5),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(10),

@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'login_page.dart';
-import 'starter_selection_page.dart'; // Ta nouvelle page
-import 'pokedex_page.dart'; // Ta page actuelle
+import 'package:pokedex/pages/login_page.dart';
+import 'package:pokedex/pages/starter_selection_page.dart';
+import 'package:pokedex/pages/pokedex_page.dart';
 
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
@@ -15,7 +15,9 @@ class AuthWrapper extends StatelessWidget {
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, authSnapshot) {
         if (authSnapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
         }
 
         // 1. Si pas connecté -> Login
@@ -31,15 +33,18 @@ class AuthWrapper extends StatelessWidget {
               .snapshots(),
           builder: (context, userSnapshot) {
             if (!userSnapshot.hasData) {
-              return const Scaffold(body: Center(child: CircularProgressIndicator()));
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
             }
 
             // Récupération du flag
             final data = userSnapshot.data!.data() as Map<String, dynamic>?;
             final bool hasChosen = data?['hasChosenStarter'] ?? false;
+            final team = List<int>.from(data?['team'] ?? const []);
 
             // 3. Choix de la page selon le flag
-            if (!hasChosen) {
+            if (!hasChosen && team.isEmpty) {
               return const StarterSelectionPage();
             }
 
