@@ -43,3 +43,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Ignorer fichiers Flutter générés (ephemeral/plugin symlinks)
+**/ephemeral/
+**/.plugin_symlinks/
