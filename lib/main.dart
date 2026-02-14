@@ -26,7 +26,9 @@ class PokeApp extends StatelessWidget {
         builder: (context, authSnapshot) {
           // Attente de la connexion Firebase Auth
           if (authSnapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(body: Center(child: CircularProgressIndicator()));
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
           }
 
           // Si l'utilisateur n'est pas connecté
@@ -42,14 +44,18 @@ class PokeApp extends StatelessWidget {
                 .snapshots(),
             builder: (context, userSnapshot) {
               if (userSnapshot.connectionState == ConnectionState.waiting) {
-                return const Scaffold(body: Center(child: CircularProgressIndicator()));
+                return const Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                );
               }
 
               // On vérifie si le document existe et si le flag est à true
               final data = userSnapshot.data?.data() as Map<String, dynamic>?;
               final hasChosen = data?['hasChosenStarter'] ?? false;
+              final team = List<int>.from(data?['team'] ?? const []);
 
-              if (!hasChosen) {
+              // Starter uniquement si pas encore choisi ET équipe vide
+              if (!hasChosen && team.isEmpty) {
                 return const StarterSelectionPage();
               }
 
